@@ -1,76 +1,52 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jul 26 17:04:52 2025
+Created on Wed Jul 30 11:16:55 2025
 
 @author: yzhao
 """
 
-
 import cv2
 import numpy as np
 
+from scipy.ndimage import center_of_mass
 
-def remove_appendages(binary_mask, max_kernel_frac=0.15):
+
+def expose_hot_area(img, threshold=50, max_threshold=50, decay_rate=0.2, percentile=1):
     """
-    Remove thin appendages from a binary mask using morphological opening.
-    The kernel size is scaled based on the size of the largest blob to avoid wiping out small pupils.
-
-    Parameters:
-    -----------
-    binary_mask : np.ndarray
-        Binary image (white = foreground/pupil, black = background).
-    max_kernel_frac : float
-        Maximum fraction of the largest contour diameter to use for kernel size.
-
-    Returns:
-    --------
-    cleaned_mask : np.ndarray
-        Mask with appendages removed but pupil preserved.
+    Create a normalized heatmap where darker pixels under the threshold have higher affinity.
+    Darkest reference is based on a percentile. Pixels darker than it are capped at max affinity.
     """
-    contours, _ = cv2.findContours(
-        binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-    if not contours:
-        return binary_mask
+    dark_pixels = np.array([])
+    while dark_pixels.size == 0 and threshold <= max_threshold:
+        mask = img < threshold
+        dark_pixels = img[mask]
+        threshold += 10
 
-    largest = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(largest)
-    d = int(max(w, h) * max_kernel_frac)
-    d = max(3, d | 1)  # Ensure it's odd and not too small
+    if dark_pixels.size == 0:
+        return np.zeros_like(img, dtype=np.float32)
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (d, d))
-    cleaned_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
-    return cleaned_mask
-
-
-def enhance_contrast(
-    img,
-    dark_threshold=30,
-    # relative_factor=10,
-    gamma=2,
-):
-
-    img = img.astype(np.float32)
-
-    # Define boost mask
-    boost_mask = img <= dark_threshold
-
-    if not np.any(boost_mask):
-        return img.astype(np.uint8)  # No boosting needed
+    darkest_val = np.percentile(dark_pixels, percentile)
+    affinity = np.zeros_like(img, dtype=np.float32)
+    delta = np.clip(img[mask] - darkest_val, a_min=0, a_max=None)
+    affinity[mask] = np.exp(-decay_rate * delta)
 
     # Normalize to [0, 1]
-    scaled = img / 255.0
+    affinity -= affinity.min()
+    # if affinity.max() > 0:
+    affinity /= affinity.max()
+    return affinity
 
-    # Create output image (copy original)
-    corrected = scaled.copy()
 
-    # Apply gamma darkening only to dark pixels
-    corrected[boost_mask] = np.power(scaled[boost_mask], gamma)
+def get_contour_image(contour, image):
+    mask = np.zeros_like(image, dtype=np.uint8)
+    cv2.drawContours(mask, [contour], -1, 1, thickness=-1)
+    contour_image = image * mask
+    return contour_image
 
-    # Scale back to [0, 255]
-    img_boosted = np.clip(corrected * 255, 0, 255).astype(np.uint8)
 
-    return img_boosted
+def get_center_of_mass(image):
+    y, x = center_of_mass(image)  # Note: (y, x) order
+    return np.array([x, y])
 
 
 def draw_mask_contour(img, mask, color=(0, 0, 255), thickness=1):

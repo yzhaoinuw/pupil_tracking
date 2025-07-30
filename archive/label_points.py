@@ -31,9 +31,7 @@ class Labeler:
 
 
 def extract_recording_and_index(filename):
-    # Strip extension
     stem = filename.stem
-    # Split by underscore and assume last part is frame index
     parts = stem.rsplit("_", 1)
     if len(parts) == 2 and parts[1].isdigit():
         recording, index = parts
@@ -44,12 +42,10 @@ def extract_recording_and_index(filename):
 
 def get_sorted_image_paths(frame_folder):
     frames_by_recording = defaultdict(list)
-
     for path in frame_folder.glob("*.png"):
         recording, index = extract_recording_and_index(path)
         frames_by_recording[recording].append((index, path))
 
-    # Sort by recording name, then by index
     sorted_paths = []
     for recording in sorted(frames_by_recording.keys()):
         sorted_frames = sorted(frames_by_recording[recording], key=lambda x: x[0])
@@ -77,39 +73,38 @@ def label_frame(image, frame_name, labeler, window_name="Label Frame"):
                 1,
             )
 
-        # Frame title overlay
         video_name, frame_ind = frame_name.rsplit("_", 1)
-        if len(video_name) > 27:
-            video_name = video_name[:30] + "..."
+        if len(video_name) > 7:
+            video_name = video_name[:10] + "..."
         frame_name_truncated = "_".join([video_name, frame_ind])
         cv2.putText(
             display,
             frame_name_truncated,
             (10, 20),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.4,
+            0.3,
             (255, 0, 0),
             1,
             cv2.LINE_AA,
         )
 
-        # Show window
         cv2.imshow(window_name, display)
-
-        # Detect if user closes window
-        if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
-            return "closed"
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("n"):
+            action = "next"
+            break
+        elif key == ord("j"):
+            action = "jump"
             break
         elif key == ord("r"):
             labeler.reset_points()
         elif key == ord("q"):
-            return "quit"
+            action = "quit"
+            break
 
     if not labeler.points:
-        return None
+        return None, action
 
     label_row = {"frame": frame_name}
     for i in range(MAX_POINTS):
@@ -120,7 +115,7 @@ def label_frame(image, frame_name, labeler, window_name="Label Frame"):
             label_row[f"x{i+1}"] = None
             label_row[f"y{i+1}"] = None
 
-    return label_row
+    return label_row, action
 
 
 def main():
@@ -138,28 +133,35 @@ def main():
     WINDOW_NAME = "Label Frame"
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
 
-    for img_path in image_paths:
+    i = 0
+    while i < len(image_paths):
+        img_path = image_paths[i]
         frame_name = img_path.name
         if frame_name in labeled_frames:
+            i += 1
             continue
 
         image = cv2.imread(str(img_path))
-        label_data = label_frame(image, frame_name, labeler, window_name=WINDOW_NAME)
+        label_data, action = label_frame(
+            image, frame_name, labeler, window_name=WINDOW_NAME
+        )
 
-        if label_data == "quit":
-            print("User exited.")
-            break
-        elif label_data == "closed":
-            print("Window was closed — recreating...")
-            cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-            continue
-
-        if label_data:
+        if label_data is not None:
             all_labels.append(label_data)
             pd.DataFrame(all_labels).to_csv(LABELS_CSV, index=False)
             print(f"Labeled {frame_name}")
         else:
             print(f"Skipped {frame_name} (no points)")
+
+        if action == "quit":
+            print("User exited.")
+            break
+        elif action == "next":
+            i += 1
+            continue
+        elif action == "jump":
+            i += 100
+            continue
 
     cv2.destroyAllWindows()
 

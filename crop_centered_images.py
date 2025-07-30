@@ -36,4 +36,4 @@ def crop_centered_150x150(input_dir, output_dir):
 
 
 if __name__ == "__main__":
-    crop_centered_150x150("./data", "data_cropped_centered")
+    crop_centered_150x150("./data", "data_cropped")

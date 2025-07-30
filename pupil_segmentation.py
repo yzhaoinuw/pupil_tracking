@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import remove_appendages, hybrid_contrast_enhance, draw_mask_contour
+from utils import remove_appendages, enhance_contrast, draw_mask_contour
 
 
 def estimate_pupil_info(pupil_image, plot_save_dir="", debug_plot_save_dir=""):
@@ -19,7 +19,7 @@ def estimate_pupil_info(pupil_image, plot_save_dir="", debug_plot_save_dir=""):
 
     # contrast enhancement
     img = cv2.GaussianBlur(img, (5, 5), 0)
-    img_enhanced = hybrid_contrast_enhance(img)
+    img_enhanced = enhance_contrast(img)
 
     # Threshold and clean
     _, img_threshed = cv2.threshold(img_enhanced, 50, 255, cv2.THRESH_BINARY_INV)
@@ -86,7 +86,7 @@ def estimate_pupil_info(pupil_image, plot_save_dir="", debug_plot_save_dir=""):
     blended = draw_mask_contour(overlay, circle_mask, color=(0, 0, 255), thickness=1)
 
     if plot_save_dir:
-        plot_save_dir.mkdir(parents=True, exist_ok=True)
+        Path(plot_save_dir).mkdir(parents=True, exist_ok=True)
         # assert Path(plot_save_dir).is_dir(), "plot_save_dir is not a valid directory."
         save_path = Path(plot_save_dir) / (Path(pupil_image).stem + "_segmented.png")
         fig = plt.figure(figsize=(3, 3))
@@ -97,7 +97,7 @@ def estimate_pupil_info(pupil_image, plot_save_dir="", debug_plot_save_dir=""):
         plt.close(fig)
 
     if debug_plot_save_dir:
-        debug_plot_save_dir.mkdir(parents=True, exist_ok=True)
+        Path(debug_plot_save_dir).mkdir(parents=True, exist_ok=True)
         # assert Path(debug_plot_save_dir).is_dir(), "debug_plot_save_dir is not a valid directory."
         save_path = Path(debug_plot_save_dir) / (Path(pupil_image).stem + "_debug.png")
         # Plot side-by-side
@@ -130,7 +130,7 @@ def estimate_pupil_info(pupil_image, plot_save_dir="", debug_plot_save_dir=""):
         plt.tight_layout()
         fig.savefig(save_path, dpi=200)
         plt.close(fig)
-        # plt.show()
+        plt.show()
 
     return info
 
@@ -156,4 +156,8 @@ if __name__ == "__main__":
     # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_40546.png"
     # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_69064.png"
     pupil_image = Path(DATA_PATH) / image_file
-    estimate_pupil_info(pupil_image, plot_save_dir="./", debug_plot_save_dir="./")
+    estimate_pupil_info(
+        pupil_image,
+        plot_save_dir="./sample_results",
+        # debug_plot_save_dir=""
+    )

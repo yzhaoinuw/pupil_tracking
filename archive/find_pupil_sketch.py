@@ -12,41 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import center_of_mass
 
-from utils import draw_mask_contour
-
-
-def exponential_dark_affinity(img, threshold=50, decay_rate=0.2, percentile=0):
-    """
-    Create a normalized heatmap where darker pixels under the threshold have higher affinity.
-    Darkest reference is based on a percentile. Pixels darker than it are capped at max affinity.
-    """
-    mask = img < threshold
-    dark_pixels = img[mask]
-
-    if dark_pixels.size == 0:
-        return np.zeros_like(img, dtype=np.float32)
-
-    darkest_val = np.percentile(dark_pixels, percentile)
-
-    affinity = np.zeros_like(img, dtype=np.float32)
-    delta = np.clip(img[mask] - darkest_val, a_min=0, a_max=None)
-    affinity[mask] = np.exp(-decay_rate * delta)
-
-    # Normalize to [0, 1]
-    affinity -= affinity.min()
-    if affinity.max() > 0:
-        affinity /= affinity.max()
-
-    return affinity
-
-
-def contour_center(cnt):
-    M = cv2.moments(cnt)
-    if M["m00"] == 0:
-        return np.array([0, 0])
-    cx = M["m10"] / M["m00"]
-    cy = M["m01"] / M["m00"]
-    return np.array([cx, cy])
+from utils import expose_hot_area, get_mass_center, draw_mask_contour
 
 
 # %%
@@ -91,9 +57,7 @@ image_file = (
 pupil_image = Path(DATA_PATH) / image_file
 # Example usage
 img = cv2.imread(pupil_image, cv2.IMREAD_GRAYSCALE)
-img_enhanced = exponential_dark_affinity(
-    img, threshold=50, decay_rate=0.25, percentile=1
-)
+img_enhanced = expose_hot_area(img, threshold=50, decay_rate=0.25, percentile=1)
 com_y, com_x = center_of_mass(img_enhanced)  # Note: (y, x) order
 
 plt.figure(figsize=(3, 3))
@@ -186,13 +150,13 @@ image_center = (int(com_x), int(com_y))
 contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)
 main_contour = None
 for cnt in contours:
-    dist = np.linalg.norm(contour_center(cnt) - image_center)
+    dist = np.linalg.norm(get_mass_center(cnt) - image_center)
     if (
         cv2.pointPolygonTest(cnt, image_center, measureDist=False) >= 0
         or abs(dist) <= 20
     ):
         main_contour = cnt
-        main_contour_center = contour_center(cnt)
+        main_contour_center = get_mass_center(cnt)
         break
 
 # Step 3: Get size of main contour
@@ -209,7 +173,7 @@ for cnt in contours:
         continue  # Rule 1: too flat
 
     # Rule 2: too far from main contour
-    dist = np.linalg.norm(contour_center(cnt) - main_contour_center)
+    dist = np.linalg.norm(get_mass_center(cnt) - main_contour_center)
     if dist > max_main_dim:
         continue
 
