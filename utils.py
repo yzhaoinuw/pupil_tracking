@@ -31,10 +31,39 @@ def expose_hot_area(img, threshold=50, max_threshold=50, decay_rate=0.2, percent
     affinity[mask] = np.exp(-decay_rate * delta)
 
     # Normalize to [0, 1]
-    affinity -= affinity.min()
-    # if affinity.max() > 0:
-    affinity /= affinity.max()
+    # affinity -= affinity.min()
+    # affinity /= affinity.max()
     return affinity
+
+
+def gaussian_mask(size=150, sigma_x=30, sigma_y=15, x0=None, y0=None):
+    """
+    Create a 2D elliptical Gaussian mask centered at (x0, y0).
+
+    Parameters:
+    - size: width and height of the square mask
+    - sigma_x: standard deviation along x-axis (controls width)
+    - sigma_y: standard deviation along y-axis (controls height)
+    - x0, y0: center coordinates of the Gaussian (in pixel indices).
+              Defaults to center of the image.
+
+    Returns:
+    - mask: 2D numpy array with values in [0, 1]
+    """
+    if x0 is None:
+        x0 = size // 2
+    if y0 is None:
+        y0 = size // 2
+
+    x = np.arange(size)
+    y = np.arange(size)
+    xx, yy = np.meshgrid(x, y)
+
+    squared_distance = ((xx - x0) ** 2) / (2 * sigma_x**2) + ((yy - y0) ** 2) / (
+        2 * sigma_y**2
+    )
+    mask = np.exp(-squared_distance)
+    return mask
 
 
 def get_contour_image(contour, image):

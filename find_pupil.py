@@ -238,16 +238,30 @@ if __name__ == "__main__":
     # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png" # hard
     # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png" # hard
     # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png" # hard
+    # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_11820.png"
 
     # small, subtle pupil
-    # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0030.png" # subtle pupil
-    # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0450.png" # subtle pupil
+    image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0030.png"  # subtle pupil
+    image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0450.png"  # subtle pupil
+    image_file = (
+        "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_80898.png"
+    )
+    image_file = (
+        "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_80995.png"
+    )
+    image_file = (
+        "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_81092.png"
+    )
+    # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_81189.png"
 
     # large pupil
     # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_16260.png"
     # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_16410.png"
     # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_17850.png"
     # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_22380.png"
+    # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_11310.png"
+    # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_25511.png"
+    # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_72750.png"
 
     # no pupil, eye closed
     # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_18090.png"
@@ -257,6 +271,6 @@ if __name__ == "__main__":
 
     info = find_pupil_info(
         pupil_image,
-        plot_save_dir="./sample_results",
-        debug_plot_save_dir="./sample_results",
+        # plot_save_dir="./sample_results",
+        debug_plot_save_dir="./sample_results_debug",
     )
