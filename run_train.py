@@ -7,24 +7,13 @@ Created on Sun Sep 28 23:09:41 2025
 
 from pathlib import Path
 
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
-
-import numpy as np
-from PIL import Image
-from torchvision import transforms
-
-# import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 
 from unet import UNet
-
-# from loss_func import DiceLoss, BCEDiceLoss
-
-PRED_THRESH = 0.6
-NOTABLE_IOU = 0.85
+from dataset_sketch import PupilDataset
 
 
 # -------------------- Metrics -------------------- #
@@ -43,99 +32,33 @@ def iou_score(pred, target, pred_thresh=0.6, epsilon=1e-6):
     return intersection / (union + epsilon)
 
 
-# -------------------- Dataset -------------------- #
-class PupilDataset(Dataset):
-    def __init__(self, image_paths, mask_paths, augment=False):
-        self.image_paths = image_paths
-        self.mask_paths = mask_paths
-        self.augment = augment
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def augment_transform(self, img, mask=False):
-        augment_sequence = [
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation(degrees=45),
-        ]
-        if not mask:
-            augment_sequence.append(
-                transforms.RandomApply(
-                    [
-                        transforms.ColorJitter(
-                            brightness=0.2,  # brightness factor: 0.8 to 1.2
-                            contrast=0.2,  # contrast factor: 0.8 to 1.2
-                        )
-                    ],
-                    p=0.5,
-                )
-            )
-            augment_sequence.append(
-                transforms.RandomApply(
-                    [transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))], p=0.5
-                )
-            )
-        augment_transform = transforms.Compose(augment_sequence)
-        return augment_transform(img)
-
-    def center_crop(self, img: np.ndarray, size: int = 148) -> np.ndarray:
-        h, w = img.shape
-        top = (h - size) // 2
-        left = (w - size) // 2
-        return img[top : top + size, left : left + size]
-
-    def __getitem__(self, idx):
-        img = Image.open(self.image_paths[idx]).convert("L")  # flatten channel
-        mask = Image.open(self.mask_paths[idx])
-
-        img = np.array(img, dtype=np.float32) / 255.0
-        mask = np.array(mask, dtype=np.float32)
-
-        img = self.center_crop(img, 148)
-        mask = self.center_crop(mask, 148)
-
-        if self.augment:
-            seed = np.random.randint(0, 9999)
-            torch.manual_seed(seed)
-            img = transforms.ToPILImage()(img)
-            img = self.augment_transform(img)
-            img = np.array(img, dtype=np.float32) / 255.0
-
-            torch.manual_seed(seed)
-            mask = transforms.ToPILImage()(mask)
-            mask = self.augment_transform(mask, mask=True)
-            mask = np.array(mask, dtype=np.float32) / 255.0
-
-        img = torch.tensor(img).unsqueeze(0)  # [1, H, W]
-        mask = torch.tensor(mask).unsqueeze(0)  # [1, H, W]
-
-        return img, mask
-
-
 # -------------------- Data Preparation -------------------- #
-def get_dataset(image_dir, mask_dir, augment=False):
+def make_dataset(image_dir, mask_dir, augment=False):
     image_paths = sorted(Path(image_dir).glob("*.png"))
     mask_paths = sorted(Path(mask_dir).glob("*.png"))
     return PupilDataset(image_paths, mask_paths, augment=augment)
 
 
+# %% Hyperparameters setup
+pred_thresh = 0.6
+notable_iou = 0.85
+patience = 5
+n_epochs = 200
 checkpoint_dir = Path("checkpoints")
-train_dataset = get_dataset("images_train", "masks_train", augment=True)
-val_dataset = get_dataset("images_validation", "masks_validation", augment=False)
+model_name = "unet_attention"
+
+
+train_dataset = make_dataset("images_train", "masks_train", augment=True)
+val_dataset = make_dataset("images_validation", "masks_validation", augment=False)
 
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
 
-# -------------------- Model Setup -------------------- #
+# %% -------------------- Model Setup -------------------- #
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = UNet(use_attention=True).to(device)
 criterion = nn.BCELoss()
-# criterion = BCEDiceLoss()
-
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
-
-# Add scheduler
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode="max",  # Because we are maximizing IoU
@@ -143,17 +66,12 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     patience=10,  # Wait 3 epochs with no improvement
     min_lr=1e-3 * 0.5**5,  # Set a floor to avoid vanishing LR
 )
-# -------------------- Training Loop -------------------- #
+
+# %% -------------------- Training Loop -------------------- #
 best_val_loss = float("inf")
 best_val_iou = 0
 prev_iou = 0
-patience = 5
 patience_counter = 0
-n_epochs = 200
-# save_pred_dir = Path("predictions_validation")
-# save_pred_dir.mkdir(exist_ok=True)
-
-
 log_lines = []  # ← log storage
 
 for epoch in range(n_epochs):
@@ -183,8 +101,8 @@ for epoch in range(n_epochs):
             val_loss += loss.item()
 
             for j in range(imgs.shape[0]):
-                dice = dice_score(preds[j], masks[j], pred_thresh=PRED_THRESH)
-                iou = iou_score(preds[j], masks[j], pred_thresh=PRED_THRESH)
+                dice = dice_score(preds[j], masks[j], pred_thresh=pred_thresh)
+                iou = iou_score(preds[j], masks[j], pred_thresh=pred_thresh)
                 val_dice += dice
                 val_iou += iou
 
@@ -208,10 +126,10 @@ for epoch in range(n_epochs):
     if val_iou > prev_iou:
         if val_iou > best_val_iou:
             best_val_iou = val_iou  # ← save for filename later
-            if best_val_iou > NOTABLE_IOU:
+            if best_val_iou > notable_iou:
                 torch.save(
                     model.state_dict(),
-                    checkpoint_dir / f"best_model_iou={best_val_iou:.4f}.pth",
+                    checkpoint_dir / f"{model_name}_iou={best_val_iou:.4f}.pth",
                 )
                 print("✅ New best model saved!")
 
@@ -225,9 +143,9 @@ for epoch in range(n_epochs):
 
     prev_iou = val_iou
 
-if best_val_iou > NOTABLE_IOU:
+if best_val_iou > notable_iou:
     # -------------------- Save Log File -------------------- #
-    log_filename = f"training_log_iou={best_val_iou:.4f}.txt"
+    log_filename = f"training_log_{model_name}_iou={best_val_iou:.4f}.txt"
     with open(checkpoint_dir / log_filename, "w") as f:
         f.write("\n".join(log_lines))
     print(f"📝 Training log saved as: {log_filename}")

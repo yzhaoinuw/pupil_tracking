@@ -8,12 +8,6 @@ Created on Sun Sep 28 00:43:33 2025
 import torch
 import torch.nn as nn
 
-# import torch.nn.functional as F
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 
 class DoubleConv(nn.Module):
     """(Conv => BN => ReLU) x2"""

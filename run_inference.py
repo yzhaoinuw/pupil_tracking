@@ -9,41 +9,26 @@ import os
 from pathlib import Path
 
 import torch
-import numpy as np
-from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from torchvision import transforms
+
+import numpy as np
 from PIL import Image
 
-
-from unet_sketch import UNet
-
-
-class TestDataset(Dataset):
-    def __init__(self, image_dir):
-        self.image_paths = list(Path(image_dir).glob("*.png"))
-        self.transform = transforms.Compose(
-            [
-                transforms.Grayscale(),
-                transforms.CenterCrop((148, 148)),
-                transforms.ToTensor(),
-            ]
-        )
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        img_path = self.image_paths[idx]
-        image = Image.open(img_path).convert("L")
-        image = self.transform(image)
-        return image, img_path.name
+from unet import UNet
+from dataset_sketch import PupilDataset
 
 
 checkpoint_dir = Path("checkpoints")
 checkpoint_path = checkpoint_dir / "best_model_iou=0.8837.pth"
-test_dataset = TestDataset("images_test/")
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+image_dir = "images_test/"
+
+# Optional: blend with original for transparency
+alpha = 0.9
+
+image_paths = sorted(Path(image_dir).glob("*.png"))
+test_dataset = PupilDataset(image_paths)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 model = UNet(use_attention=True)
 model.load_state_dict(torch.load(checkpoint_path))
@@ -63,7 +48,7 @@ with torch.no_grad():
 
         for i in range(len(images)):
             # Load the original image from disk again (for visualization)
-            orig = Image.open(Path("images_test") / names[i]).convert("L")
+            orig = Image.open(Path(image_dir) / names[i]).convert("L")
             orig = transforms.CenterCrop((148, 148))(orig)
             orig_np = np.array(orig)
 
@@ -75,8 +60,6 @@ with torch.no_grad():
             overlay = rgb.copy()
             overlay[mask == 1] = [255, 0, 0]  # red where mask is positive
 
-            # Optional: blend with original for transparency
-            alpha = 0.8
             blended = (alpha * rgb + (1 - alpha) * overlay).astype(np.uint8)
 
             # Save result
