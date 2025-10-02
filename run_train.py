@@ -13,7 +13,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from unet import UNet
-from dataset_sketch import PupilDataset
+from dataset import PupilDataset
 
 
 # -------------------- Metrics -------------------- #

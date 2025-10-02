@@ -5,29 +5,19 @@ Created on Tue Sep 30 14:19:02 2025
 @author: yzhao
 """
 
-import torch
-from torch.utils.data import Dataset
-
 from PIL import Image
+from torch.utils.data import Dataset
 import torchvision.transforms.v2 as transforms
 
 
-pil_to_tensor = transforms.PILToTensor()
-crop = transforms.CenterCrop(148)
-
-
-def center_crop(img: torch.Tensor, size: int = 148) -> torch.Tensor:
-    _, h, w = img.shape  # [C,H,W]
-    top = (h - size) // 2
-    left = (w - size) // 2
-    return img[:, top : top + size, left : left + size]
-
-
-class PupilTrainDataset(Dataset):
-    def __init__(self, image_paths, mask_paths, augment=False):
+class PupilDataset(Dataset):
+    def __init__(self, image_paths, mask_paths=None, augment=False, crop_size=148):
         self.image_paths = image_paths
         self.mask_paths = mask_paths
         self.augment = augment
+        self.crop_size = crop_size
+        self.pil_to_tensor = transforms.PILToTensor()
+        self.center_crop = transforms.CenterCrop(self.crop_size)
 
     def __len__(self):
         return len(self.image_paths)
@@ -62,33 +52,23 @@ class PupilTrainDataset(Dataset):
         return transform(img)
 
     def __getitem__(self, idx):
-        img = Image.open(self.image_paths[idx]).convert("L")  # flatten channel
-        mask = Image.open(self.mask_paths[idx])
-        img, mask = crop(img), crop(mask)
+        img_path = self.image_paths[idx]
+        img = Image.open(img_path).convert("L")
+        img = self.center_crop(img)
 
+        if self.mask_paths is None:
+            img = self.pil_to_tensor(img)
+            img = img.float()
+            img = img / 255.0
+            return img, img_path.name
+
+        mask = Image.open(self.mask_paths[idx])
+        mask = self.center_crop(mask)
         if self.augment:
             img, mask = self.transform_img_mask(img, mask)
             img = self.transform_img(img)
 
-        img = pil_to_tensor(img)
-        mask = pil_to_tensor(mask)
+        img, mask = self.pil_to_tensor(img), self.pil_to_tensor(mask)
         img, mask = img.float(), mask.float()
         img = img / 255.0
         return img, mask
-
-
-class PupilTestDataset(Dataset):
-    def __init__(self, image_paths):
-        self.image_paths = image_paths
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        img_path = self.image_paths[idx]
-        img = Image.open(self.image_paths[idx]).convert("L")
-        img = crop(img)
-        img = pil_to_tensor(img)
-        img = img.float()
-        img = img / 255.0
-        return img, img_path.name

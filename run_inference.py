@@ -16,7 +16,7 @@ import numpy as np
 from PIL import Image
 
 from unet import UNet
-from dataset_sketch import PupilDataset
+from dataset import PupilDataset
 
 
 checkpoint_dir = Path("checkpoints")
