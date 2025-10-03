@@ -31,24 +31,33 @@ def generate_pupil_mask_prediction(
 ):
     """Run inference, collect pupil diameters, and optionally save overlay images."""
 
+    print(f"Building dataloader with batch size = {batch_size}.")
     image_paths = sorted(image_dir.glob("*.png"))
     test_dataset = PupilDataset(image_paths)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False, num_workers=4
+    )
 
+    print("Loading UNet model...")
     model = UNet(use_attention=True)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device_name = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device_name)
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     model.to(device)
     model.eval()
 
     results = []
-
-    with torch.no_grad():
-        for images, names in tqdm(test_loader, desc="Processing batches", unit="batch"):
+    # with torch.no_grad():
+    with torch.inference_mode():
+        for images, names in tqdm(
+            test_loader, desc="Segmenting pupil images...", unit="batch"
+        ):
             images = images.to(device)
-            preds = model(images)
-            preds = (preds > pred_thresh).float().cpu().numpy()
 
+            with torch.autocast(device_type=device_name, dtype=torch.float16):
+                preds = model(images)
+
+            preds = (preds > pred_thresh).float().cpu().numpy()
             pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)))
 
             for i, (name, diam) in enumerate(zip(names, pupil_diam_batch)):
