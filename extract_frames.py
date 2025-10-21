@@ -5,8 +5,8 @@ Created on Thu Oct  2 15:27:03 2025
 @author: yzhao
 """
 
-from pathlib import Path
 import argparse
+from pathlib import Path
 
 import cv2
 import numpy as np

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Oct  1 13:49:53 2025
+Created on Tue Oct 21 00:07:48 2025
 
 @author: yzhao
 """
+
 
 import argparse
 from pathlib import Path
@@ -19,6 +20,7 @@ from torch.utils.data import DataLoader
 
 from unet import UNet
 from dataset import PupilDataset
+from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 
 def generate_pupil_mask_prediction(
@@ -30,9 +32,11 @@ def generate_pupil_mask_prediction(
     mask_transparency: float = 0.1,
 ):
     """Run inference, collect pupil diameters, and optionally save overlay images."""
-
     print(f"Building dataloader with batch size = {batch_size}.")
     image_paths = sorted(image_dir.glob("*.png"))
+    if not image_paths:
+        raise FileNotFoundError(f"No PNG files found in {image_dir}")
+
     test_dataset = PupilDataset(image_paths)
     test_loader = DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=4
@@ -47,16 +51,13 @@ def generate_pupil_mask_prediction(
     model.eval()
 
     results = []
-    # with torch.no_grad():
     with torch.inference_mode():
         for images, names in tqdm(
             test_loader, desc="Segmenting pupil images...", unit="batch"
         ):
             images = images.to(device)
-
             with torch.autocast(device_type=device_name, dtype=torch.float16):
                 preds = model(images)
-
             preds = (preds > pred_thresh).float().cpu().numpy()
             pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)))
 
@@ -64,23 +65,16 @@ def generate_pupil_mask_prediction(
                 results.append((name, diam))
 
                 if output_mask_dir is not None:
-                    # Reload original for overlay
                     orig = Image.open(image_dir / names[i]).convert("L")
                     orig = test_dataset.center_crop(orig)
                     orig_np = np.array(orig)
-
-                    # Make RGB from grayscale
                     rgb = np.stack([orig_np] * 3, axis=-1)
-
-                    # Overlay red where mask=1
                     mask = preds[i].squeeze()
                     overlay = rgb.copy()
                     overlay[mask == 1] = [255, 0, 0]
-
                     blended = (
                         (1 - mask_transparency) * rgb + mask_transparency * overlay
                     ).astype(np.uint8)
-
                     out_path = output_mask_dir / names[i]
                     Image.fromarray(blended).save(out_path)
 
@@ -88,11 +82,9 @@ def generate_pupil_mask_prediction(
 
 
 def save_results(results, result_dir: Path, exp_name: str):
-    """Save results as CSV and plot."""
     results.sort(key=lambda x: int(Path(x[0]).stem.split("_")[-1]))
     df = pd.DataFrame(results, columns=["image_name", "estimated_pupil_diameter"])
     df.index = np.arange(1, len(df) + 1)
-
     csv_path = result_dir / f"{exp_name}_estimated_pupil_diameter.csv"
     df.to_csv(csv_path, index=True)
 
@@ -111,18 +103,29 @@ def save_results(results, result_dir: Path, exp_name: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Pupil diameter analysis")
+    parser = argparse.ArgumentParser(description="Pupil diameter analysis pipeline")
     parser.add_argument(
-        "--image_dir", type=Path, required=True, help="Directory of input images"
+        "--video_path", type=Path, help="Optional video file to extract frames from"
     )
     parser.add_argument(
-        "--result_dir", type=Path, required=True, help="Directory to save results"
+        "--out_dir",
+        type=Path,
+        help="Directory to save extracted frames (used with --video_path)",
+    )
+    parser.add_argument(
+        "--image_dir",
+        type=Path,
+        help="Directory of existing PNG images (skips extraction)",
+    )
+    parser.add_argument(
+        "--result_dir",
+        type=Path,
+        help="Directory to save results (auto-created if not given)",
     )
     parser.add_argument(
         "--checkpoint",
         type=Path,
         default=Path("checkpoints") / "best_model_iou=0.8837.pth",
-        help="Path to model checkpoint",
     )
     parser.add_argument(
         "--output_mask_dir",
@@ -130,22 +133,33 @@ def main():
         default=None,
         help="Optional directory to save overlay images",
     )
-    parser.add_argument(
-        "--batch_size", type=int, default=32, help="Batch size for inference"
-    )
-    parser.add_argument(
-        "--pred_thresh", type=float, default=0.6, help="Mask Prediction Threshold"
-    )
-    parser.add_argument(
-        "--mask_transparency", type=float, default=0.1, help="Overlay blending factor"
-    )
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--pred_thresh", type=float, default=0.6)
+    parser.add_argument("--mask_transparency", type=float, default=0.1)
+    parser.add_argument("--extraction_fps", type=float, default=5)
+    parser.add_argument("--max_frames", type=int, default=10000)
     args = parser.parse_args()
 
-    args.result_dir.mkdir(parents=True, exist_ok=True)
+    # Handle extraction logic
+    if args.video_path:
+        print("Video path provided — extracting frames first...")
+
+        # Auto-derive out_dir if not given
+        if args.out_dir is None:
+            args.out_dir = args.video_path.parent / f"{args.video_path.stem}_frames"
+            print(f"No out_dir provided. Using default: {args.out_dir}")
+
+        extract_selected_frames(
+            args.video_path, args.out_dir, args.extraction_fps, args.max_frames
+        )
+        args.image_dir = args.out_dir
+
+    elif args.image_dir is None:
+        raise ValueError("You must specify either (--video_path) or (--image_dir).")
+
     if args.output_mask_dir is not None:
         args.output_mask_dir.mkdir(parents=True, exist_ok=True)
 
-    # inference + save masks
     results = generate_pupil_mask_prediction(
         args.checkpoint,
         args.image_dir,
@@ -155,12 +169,13 @@ def main():
         mask_transparency=args.mask_transparency,
     )
 
-    # experiment name (based on filename prefix)
+    if args.result_dir is None:
+        args.result_dir = args.image_dir.parent / f"{args.image_dir.stem}_result"
+        print(f"No result_dir provided. Using default: {args.result_dir}")
+    args.result_dir.mkdir(parents=True, exist_ok=True)
     exp_name = (
         "_".join(Path(results[0][0]).stem.split("_")[:-1]) if results else "experiment"
     )
-
-    # save csv + plot
     save_results(results, args.result_dir, exp_name)
 
 
