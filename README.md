@@ -22,13 +22,12 @@
   <img src="example_segmentation/example4_mask.png" width="30%" style="margin-left:15px;"/>
 </p>
 
-<p align="center"><em>Left: original pupil frame —> Right: segmentation result/em></p>
+<p align="center"><em>Left: original pupil frame ⟹ Right: segmentation result</em></p>
 
 # Pupil Analysis Pipeline
 
 This script runs a full pipeline for **mouse pupil segmentation and size estimation** using a trained UNet model.  
 You can start directly from a video file or from an existing folder of extracted frames. To obtain expected results, the video or images provided should have at least the majority of the eye contained in the 148 x 148 pixel - area in the center of the frames.  This is crucial to getting good results as the model was trained on 148 x 148 centered cropped images.  
-
 
 ---
 
