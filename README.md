@@ -1,25 +1,25 @@
 <p align="center">
-  <img src="example_segmentation/example1_image.png" width="30%" style="margin-right:10px;"/>
-  <span style="font-size:22px; font-weight:bold;">→</span>
-  <img src="example_segmentation/example1_mask.png" width="30%" style="margin-left:10px;"/>
+  <img src="example_segmentation/example1_image.png" width="30%" style="margin-right:15px;"/>
+<span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
+  <img src="example_segmentation/example1_mask.png" width="30%" style="margin-left:15px;"/>
 </p>
 
 <p align="center">
-  <img src="example_segmentation/example2_image.png" width="30%" style="margin-right:10px;"/>
-  <span style="font-size:22px; font-weight:bold;">→</span>
-  <img src="example_segmentation/example2_mask.png" width="30%" style="margin-left:10px;"/>
+  <img src="example_segmentation/example2_image.png" width="30%" style="margin-right:15px;"/>
+  <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
+  <img src="example_segmentation/example2_mask.png" width="30%" style="margin-left:15px;"/>
 </p>
 
 <p align="center">
-  <img src="example_segmentation/example3_image.png" width="30%" style="margin-right:10px;"/>
-  <span style="font-size:22px; font-weight:bold;">→</span>
-  <img src="example_segmentation/example3_mask.png" width="30%" style="margin-left:10px;"/>
+  <img src="example_segmentation/example3_image.png" width="30%" style="margin-right:15px;"/>
+  <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
+  <img src="example_segmentation/example3_mask.png" width="30%" style="margin-left:15px;"/>
 </p>
 
 <p align="center">
-  <img src="example_segmentation/example4_image.png" width="30%" style="margin-right:10px;"/>
-  <span style="font-size:22px; font-weight:bold;">→</span>
-  <img src="example_segmentation/example4_mask.png" width="30%" style="margin-left:10px;"/>
+  <img src="example_segmentation/example4_image.png" width="30%" style="margin-right:15px;"/>
+ <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
+  <img src="example_segmentation/example4_mask.png" width="30%" style="margin-left:15px;"/>
 </p>
 
 <p align="center"><em>Left: original pupil frame —> Right: segmentation result/em></p>
