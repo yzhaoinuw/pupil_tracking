@@ -1,14 +1,49 @@
+<p align="center">
+  <img src="example_segmentation/example1_image.png" width="45%" />
+  <img src="example_segmentation/example1_mask.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="example_segmentation/example2_image.png" width="45%" />
+  <img src="example_segmentation/example2_mask.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="example_segmentation/example3_image.png" width="45%" />
+  <img src="example_segmentation/example3_mask.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="example_segmentation/example4_image.png" width="45%" />
+  <img src="example_segmentation/example4_mask.png" width="45%" />
+</p>
+
+*Left: original pupil frame — Right: segmentation result.*
+
 # Pupil Analysis Pipeline
 
 This script runs a full pipeline for **mouse pupil segmentation and size estimation** using a trained UNet model.  
-You can start directly from a video file or from an existing folder of extracted frames.
+You can start directly from a video file or from an existing folder of extracted frames. To obtain expected results, the video or images provided should have at least the majority of the eye contained in the 148 x 148 pixel - area in the center of the frames.  This is crucial to getting good results as the model was trained on 148 x 148 centered cropped images.  
+
 
 ---
 
-## 🏃 Basic Usage
-
+## 📦 Installation
+It is reccomended that you first create a dedicated virtual environment, for example, with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install). Then in the virtual environment, navigate to a desired working directory and follow the steps below. 
+### 1. Clone the repository
 ```bash
-python run_pupil_analysis.py --video_path /path/to/movie.avi
+git clone https://github.com/yzhaoinuw/pupil_tracking.git
+cd pupil_analysis
+```
+### 2. Install dependencies
+```bash
+pip install -e .
+```
+
+## 🏃 Basic Usage
+After installation, you can run pupil analysis on a video like so
+```bash
+run-pupil-analysis --video_path /path/to/movie.avi
 ```
 
 This will:
@@ -36,17 +71,21 @@ This will:
 
 **From a video (auto frame extraction):**
 ```bash
-python run_pupil_analysis.py --video_path data/mouse1.avi
+run-pupil-analysis --video_path data/mouse1.avi
 ```
 
 **From an existing folder of frames:**
 ```bash
-python run_pupil_analysis.py --image_dir data/mouse1_frames
+run-pupil-analysis --image_dir data/mouse1_frames
 ```
 
-**With custom output locations:**
+**With custom output locations and segmentation masks:**
 ```bash
-python run_pupil_analysis.py   --video_path data/mouse1.avi   --out_dir data/frames_mouse1   --result_dir data/results_mouse1   --output_mask_dir data/masks_mouse1
+run-pupil-analysis \
+  --video_path data/mouse1.avi \
+  --out_dir data/frames_mouse1 \
+  --result_dir data/results_mouse1 \
+  --output_mask_dir data/masks_mouse1
 ```
 
 ---
