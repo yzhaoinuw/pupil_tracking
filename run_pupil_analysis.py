@@ -23,6 +23,10 @@ from dataset import PupilDataset
 from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_CHECKPOINT = SCRIPT_DIR / "checkpoints" / "best_model_iou=0.8837.pth"
+
+
 def generate_pupil_mask_prediction(
     checkpoint_path,
     image_dir: Path,
@@ -125,7 +129,8 @@ def main():
     parser.add_argument(
         "--checkpoint",
         type=Path,
-        default=Path("checkpoints") / "best_model_iou=0.8837.pth",
+        default=DEFAULT_CHECKPOINT,
+        help=f"Path to model checkpoint (default: {DEFAULT_CHECKPOINT})",
     )
     parser.add_argument(
         "--output_mask_dir",
