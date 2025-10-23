@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="https://drive.google.com/file/d/1VGqgPpWL6r2ywrpVO3HfGOPcYlCZ9n9x/view?usp=sharing" width="100%">
-</p>
+![pupil_diameter_analysis_result_demo](https://github.com/user-attachments/assets/cca0794f-07d9-4ed1-a25e-310dd553e98d)
 
-<p align="center"><em>Left: segmented pupil — Right: evolving pupil diameter plot/em></p>
+<p align="center"><em>Left: segmented pupil — Right: evolving pupil diameter plot</em></p>
 
 # Pupil Analysis Pipeline
 
