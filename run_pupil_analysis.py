@@ -59,7 +59,8 @@ def generate_pupil_mask_prediction(
             with torch.autocast(device_type=device_name, dtype=torch.float16):
                 preds = model(images)
             preds = (preds > pred_thresh).float().cpu().numpy()
-            pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)))
+            # pupil_area = 1 / 4 * np.pi * diam ** 2 -> diam = np.sqrt(pupil_area * (4 / np.pi))
+            pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)) * 1.27)
 
             for i, (name, diam) in enumerate(zip(names, pupil_diam_batch)):
                 results.append((name, diam))
