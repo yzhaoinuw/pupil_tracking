@@ -1,28 +1,6 @@
-<p align="center">
-  <img src="example_segmentation/example1_image.png" width="30%" style="margin-right:15px;"/>
-<span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
-  <img src="example_segmentation/example1_mask.png" width="30%" style="margin-left:15px;"/>
-</p>
+![pupil_diameter_analysis_result_demo](https://github.com/user-attachments/assets/cca0794f-07d9-4ed1-a25e-310dd553e98d)
 
-<p align="center">
-  <img src="example_segmentation/example2_image.png" width="30%" style="margin-right:15px;"/>
-  <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
-  <img src="example_segmentation/example2_mask.png" width="30%" style="margin-left:15px;"/>
-</p>
-
-<p align="center">
-  <img src="example_segmentation/example3_image.png" width="30%" style="margin-right:15px;"/>
-  <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
-  <img src="example_segmentation/example3_mask.png" width="30%" style="margin-left:15px;"/>
-</p>
-
-<p align="center">
-  <img src="example_segmentation/example4_image.png" width="30%" style="margin-right:15px;"/>
- <span style="font-size:40px; font-weight:bold; vertical-align:middle;">⟹</span>
-  <img src="example_segmentation/example4_mask.png" width="30%" style="margin-left:15px;"/>
-</p>
-
-<p align="center"><em>Left: original pupil frame ⟹ Right: segmentation result</em></p>
+<p align="center"><em>Left: segmented pupil — Right: evolving pupil diameter plot</em></p>
 
 # Pupil Analysis Pipeline
 
