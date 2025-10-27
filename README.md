@@ -10,16 +10,19 @@ You can start directly from a video file or from an existing folder of extracted
 ---
 
 ## 📦 Installation
-It is reccomended that you first create a dedicated virtual environment, for example, with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install). Then in the virtual environment, navigate to a desired working directory and follow the steps below. 
+It is recommended that you first create a dedicated virtual environment, for example, with [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install). Then in the virtual environment, navigate to a desired working directory and follow the steps below. 
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/yzhaoinuw/pupil_tracking.git
-cd pupil_analysis
+cd pupil_tracking
 ```
 ### 2. Install dependencies
 ```bash
 pip install -e .
 ```
+### 3. Download model checkpoint
+Download `checkpoints/` from [Onedrive](https://uofr-my.sharepoint.com/:f:/g/personal/yzhao38_ur_rochester_edu/EkV9WCc9VQ1Mk1HUcfhZPhgBynbBr5YMczw2Stcv9aRFGQ?e=bndEXX) (contact Yue if you don't have access), and then place it in `pupil_tracking/`.
+
 
 ## 🏃 Basic Usage
 After installation, you can run pupil analysis on a video like so
@@ -107,5 +110,5 @@ Create two folders in *pupil_tracking/*, *images_train/* and *masks_train/* if y
 1. In Terminal/Anaconda Powershell Prompt, activate environment pupil_tracking, then run `labelme.exe`
 to open the labelme interface to label images.
 2. After you are done, **labelme** should have saved your labels as json files in *images_train/* along with your training images. Now run `python .\labelme_json2png.py`, which will create the masks (png files) and move them to *masks_train/*.
-3. To create the validation set, create *images_validation/* and *masks_validation/* and then follow the same steps above, but remember to change **image_dir** and **mask_dir** in **labelme_json2png.py** accodingly.
+3. To create the validation set, create *images_validation/* and *masks_validation/* and then follow the same steps above, but remember to change **image_dir** and **mask_dir** in **labelme_json2png.py** accordingly.
 4. To start training the model, run `python run_train.py`. You can modify the hyperparameters in **run_train.py** as needed.
