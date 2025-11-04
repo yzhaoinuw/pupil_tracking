@@ -40,19 +40,19 @@ def make_dataset(image_dir, mask_dir, augment=False):
 
 
 # %% Hyperparameters setup
-pred_thresh = 0.6
+pred_thresh = 0.7
 notable_iou = 0.85
 patience = 5
 n_epochs = 200
 checkpoint_dir = Path("checkpoints")
-model_name = "unet_attention"
-
 
 train_dataset = make_dataset("images_train", "masks_train", augment=True)
 val_dataset = make_dataset("images_validation", "masks_validation", augment=False)
 
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
+
+model_name = f"unet_attention_{len(train_dataset)}pupils_pred_thresh={pred_thresh}"
 
 # %% -------------------- Model Setup -------------------- #
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

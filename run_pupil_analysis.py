@@ -24,14 +24,18 @@ from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_CHECKPOINT = SCRIPT_DIR / "checkpoints" / "best_model_iou=0.8837.pth"
+DEFAULT_CHECKPOINT = (
+    SCRIPT_DIR
+    / "checkpoints"
+    / "unet_attention_84pupils_pred_thresh=0.7_iou=0.8990.pth"
+)
 
 
 def generate_pupil_mask_prediction(
     checkpoint_path,
     image_dir: Path,
     output_mask_dir: Path = None,
-    pred_thresh: float = 0.6,
+    pred_thresh: float = 0.7,
     batch_size: int = 32,
     mask_transparency: float = 0.1,
 ):
@@ -140,7 +144,7 @@ def main():
         help="Optional directory to save overlay images",
     )
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--pred_thresh", type=float, default=0.6)
+    parser.add_argument("--pred_thresh", type=float, default=0.7)
     parser.add_argument("--mask_transparency", type=float, default=0.1)
     parser.add_argument("--extraction_fps", type=float, default=5)
     parser.add_argument("--max_frames", type=int, default=10000)

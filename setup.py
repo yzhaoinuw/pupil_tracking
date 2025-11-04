@@ -16,7 +16,7 @@ def load_requirements():
 
 setup(
     name="pupil-analysis",
-    version="0.1.0",
+    version="0.1.1",
     description="Automated mouse pupil segmentation and diameter analysis using UNet",
     author="Yue Zhao",
     py_modules=["extract_frames", "run_pupil_analysis", "dataset", "unet"],

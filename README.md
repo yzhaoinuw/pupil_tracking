@@ -47,7 +47,9 @@ This will:
 | `--image_dir`       | Optional alternative to `--video_path`. Use this if you already have extracted PNG frames.                        |
 | `--result_dir`      | Optional. Directory to save the CSV and plot outputs. If not given, defaults to `<image_dir>_result/`.            |
 | `--output_mask_dir` | Optional. If provided, saves overlay images showing the predicted pupil mask blended onto the original frames.    |
-| `--max_frames`      | Limits the maximum number of frames to extract from a video (default: 10,000). Useful for long recordings.        |
+| `--extraction_fps`  | Optional. Specifies the number of frames per second at which to extract the frames from the video (default: 5). If `--max_frames` is provided, and if the number of frames to be extracted at `--extraction_fps` would exceed `--max_frames`, then the actual `--extraction_fps` will be automatically reduced so that `--max_frames` number of frames will be extracted. |
+| `--max_frames`      | Optional. Limits the maximum number of frames to extract from a video (default: 10,000). Useful for long recordings.        |
+| `--pred_thresh`     | Optional. Ranging from 0 to 1, it specifies the confidence threshold for calssifying a pixel belonging to a pupil. For example, a value of 0.7 means that a pixel will be classified as a pupil pixel on if the model has a confidence that exceeds 0.7 that this pixel is a pupil pixel. Increase it to if the resulting segmentation overpredicts a pupil; reduce it if the resulting segmentation only finds part of a pupil. |  
 
 ---
 

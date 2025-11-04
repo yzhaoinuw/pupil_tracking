@@ -20,11 +20,14 @@ from dataset import PupilDataset
 
 
 checkpoint_dir = Path("checkpoints")
-checkpoint_path = checkpoint_dir / "best_model_iou=0.8837.pth"
-image_dir = "images_test/"
+checkpoint_path = (
+    checkpoint_dir / "unet_attention_84pupils_pred_thresh=0.7_iou=0.8990.pth"
+)
+image_dir = "images_test_3/"
 
 # Optional: blend with original for transparency
 alpha = 0.9
+pred_thresh = 0.8
 
 image_paths = sorted(Path(image_dir).glob("*.png"))
 test_dataset = PupilDataset(image_paths)
@@ -44,7 +47,7 @@ with torch.no_grad():
     for images, names in test_loader:
         images = images.to(device)
         preds = model(images)
-        preds = (preds > 0.6).float().cpu().numpy()
+        preds = (preds > pred_thresh).float().cpu().numpy()
 
         for i in range(len(images)):
             # Load the original image from disk again (for visualization)
