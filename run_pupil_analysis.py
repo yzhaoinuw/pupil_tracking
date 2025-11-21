@@ -64,8 +64,8 @@ def generate_pupil_mask_prediction(
             test_loader, desc="Segmenting pupil images...", unit="batch"
         ):
             images = images.to(device)
-            with torch.autocast(device_type=device_name, dtype=torch.float16):
-                preds = model(images)
+            # with torch.autocast(device_type=device_name, dtype=torch.float16):
+            preds = model(images)
             preds = (preds > pred_thresh).float().cpu().numpy()
             # pupil_area = 1 / 4 * np.pi * diam ** 2 -> diam = np.sqrt(pupil_area * (4 / np.pi))
             pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)) * 1.27)
@@ -180,7 +180,10 @@ def main():
     )
 
     if args.result_dir is None:
-        args.result_dir = args.image_dir.parent / f"{args.image_dir.stem}_result"
+        if args.video_path:
+            args.result_dir = args.video_path.parent / f"{args.video_path.stem}_result"
+        else:
+            args.result_dir = Path(str(args.image_dir) + "_result")
         print(f"No result_dir provided. Using default: {args.result_dir}")
     args.result_dir.mkdir(parents=True, exist_ok=True)
     exp_name = (
