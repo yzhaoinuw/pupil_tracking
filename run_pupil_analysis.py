@@ -75,7 +75,8 @@ def generate_pupil_mask_prediction(
 
                 if output_mask_dir is not None:
                     orig = Image.open(image_dir / names[i]).convert("L")
-                    orig = test_dataset.center_crop(orig)
+                    #orig = test_dataset.center_crop(orig)
+                    orig = test_dataset.resize_with_pad(orig, target_size=148)
                     orig_np = np.array(orig)
                     rgb = np.stack([orig_np] * 3, axis=-1)
                     mask = preds[i].squeeze()
