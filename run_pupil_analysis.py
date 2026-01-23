@@ -16,10 +16,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 import torch
-from torch.utils.data import DataLoader, resize_with_pad
+from torch.utils.data import DataLoader
 
 from unet import UNet
-from dataset import PupilDataset
+from dataset import PupilDataset, resize_with_pad
 from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 
@@ -65,7 +65,7 @@ def generate_pupil_mask_prediction(
         ):
             images = images.to(device)
             # with torch.autocast(device_type=device_name, dtype=torch.float16):
-            preds = model(images)
+            preds = torch.sigmoid(model(images))
             preds = (preds > pred_thresh).float().cpu().numpy()
             # pupil_area = 1 / 4 * np.pi * diam ** 2 -> diam = np.sqrt(pupil_area * (4 / np.pi))
             pupil_diam_batch = np.sqrt(np.sum(preds, axis=(1, 2, 3)) * 1.27)
