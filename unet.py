@@ -73,5 +73,4 @@ class UNet(nn.Module):
         x = self.conv1(torch.cat([x, x2], dim=1))
         x = self.up2(x)
         x = self.conv2(torch.cat([x, x1], dim=1))
-        x = self.outc(x)
-        return torch.sigmoid(x)
+        return self.outc(x)

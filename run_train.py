@@ -52,12 +52,12 @@ val_dataset = make_dataset("images_validation", "masks_validation", augment=Fals
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
 
-model_name = f"unet_attention_{len(train_dataset)}pupils_pred_thresh={pred_thresh}"
+model_name = f"unet_atn_resize_{len(train_dataset)}pupils_thresh={pred_thresh}"
 
 # %% -------------------- Model Setup -------------------- #
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = UNet(use_attention=True).to(device)
-criterion = nn.BCELoss()
+criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
