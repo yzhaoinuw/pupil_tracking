@@ -25,7 +25,7 @@ class RandomAffinePair:
     def __init__(
         self,
         degrees=8,
-        translate=(0.03, 0.03),
+        translate=(0, 0),
         scale=(0.95, 1.05),
         shear=None,
         fill_img=0,
@@ -220,7 +220,6 @@ class PupilDataset(Dataset):
         # A single, paired affine that rotates/translates/scales cleanly
         self.affine_pair = RandomAffinePair(
             degrees=8,              # much more realistic than 45 for most setups
-            translate=(0.03, 0.03),
             scale=(0.95, 1.05),
             shear=None,
             fill_img=0,
