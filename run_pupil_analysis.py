@@ -27,7 +27,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = (
     SCRIPT_DIR
     / "checkpoints"
-    / "unet_attention_84pupils_pred_thresh=0.7_iou=0.8990.pth"
+    / "unet_atn_resize_130pupils_thresh=0.7_iou=0.8916.pth"
 )
 
 
@@ -59,10 +59,14 @@ def generate_pupil_mask_prediction(
     model.eval()
 
     results = []
+    pbar = tqdm(
+        total=len(test_dataset),
+        desc="Segmenting pupil images...",
+        unit="image"
+    )
     with torch.inference_mode():
-        for images, names in tqdm(
-            test_loader, desc="Segmenting pupil images...", unit="batch"
-        ):
+        for images, names in test_loader:
+            image_count = images.size(0)
             images = images.to(device)
             # with torch.autocast(device_type=device_name, dtype=torch.float16):
             preds = torch.sigmoid(model(images))
@@ -87,7 +91,9 @@ def generate_pupil_mask_prediction(
                     ).astype(np.uint8)
                     out_path = output_mask_dir / names[i]
                     Image.fromarray(blended).save(out_path)
-
+                    
+            pbar.update(image_count)
+    pbar.close()
     return results
 
 

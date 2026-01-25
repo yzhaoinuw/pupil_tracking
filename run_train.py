@@ -19,14 +19,14 @@ from dataset import PupilDataset
 # -------------------- Metrics -------------------- #
 def dice_score(pred, target, pred_thresh=0.6, epsilon=1e-6):
     pred = (pred > pred_thresh).float()
-    target = (target > pred_thresh).float()
+    target = target.float()
     intersection = (pred * target).sum()
     return (2.0 * intersection) / (pred.sum() + target.sum() + epsilon)
 
 
 def iou_score(pred, target, pred_thresh=0.6, epsilon=1e-6):
     pred = (pred > pred_thresh).float()
-    target = (target > pred_thresh).float()
+    target = target.float()
     intersection = (pred * target).sum()
     union = pred.sum() + target.sum() - intersection
     return intersection / (union + epsilon)
@@ -42,35 +42,38 @@ def make_dataset(image_dir, mask_dir, augment=False):
 # %% Hyperparameters setup
 pred_thresh = 0.7
 notable_iou = 0.85
-patience = 5
+patience = 20
 n_epochs = 200
-checkpoint_dir = Path("checkpoints")
+use_attention=True
+
+checkpoint_dir = Path("checkpoints_exp")
+checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
 train_dataset = make_dataset("images_train", "masks_train", augment=True)
 val_dataset = make_dataset("images_validation", "masks_validation", augment=False)
 
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
-
-model_name = f"unet_atn_resize_{len(train_dataset)}pupils_thresh={pred_thresh}"
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, pin_memory=True)
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, pin_memory=True)
+use_atn = "atn_" * use_attention
+model_name = f"unet_{use_atn}resize_{len(train_dataset)}pupils_thresh={pred_thresh}"
 
 # %% -------------------- Model Setup -------------------- #
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = UNet(use_attention=True).to(device)
+model = UNet(use_attention=use_attention).to(device)
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     optimizer,
     mode="max",  # Because we are maximizing IoU
     factor=0.5,  # Reduce LR by half
-    patience=10,  # Wait 3 epochs with no improvement
+    patience=10,  # Wait patience number of epochs with no improvement
     min_lr=1e-3 * 0.5**5,  # Set a floor to avoid vanishing LR
 )
 
 # %% -------------------- Training Loop -------------------- #
-best_val_loss = float("inf")
+#best_val_loss = float("inf")
 best_val_iou = 0
-prev_iou = 0
+#prev_iou = 0
 patience_counter = 0
 log_lines = []  # ← log storage
 
@@ -100,15 +103,15 @@ for epoch in range(n_epochs):
             loss = criterion(preds, masks)
             val_loss += loss.item()
 
-            for j in range(imgs.shape[0]):
-                dice = dice_score(preds[j], masks[j], pred_thresh=pred_thresh)
-                iou = iou_score(preds[j], masks[j], pred_thresh=pred_thresh)
-                val_dice += dice
-                val_iou += iou
+            dice = dice_score(torch.sigmoid(preds), masks, pred_thresh=pred_thresh)
+            iou = iou_score(torch.sigmoid(preds), masks, pred_thresh=pred_thresh)
+            val_dice += dice
+            val_iou += iou
 
     val_loss /= len(val_loader)
-    val_dice /= len(val_dataset)
-    val_iou /= len(val_dataset)
+    val_dice /= len(val_loader)
+    val_iou /= len(val_loader)
+    scheduler.step(val_iou)
 
     # -------------------- Logging -------------------- #
     log_line = (
@@ -121,17 +124,16 @@ for epoch in range(n_epochs):
     )
     print(log_line)
     log_lines.append(log_line)
-    scheduler.step(val_iou)
+    
     # -------------------- Early Stopping -------------------- #
-    if val_iou > prev_iou:
-        if val_iou > best_val_iou:
-            best_val_iou = val_iou  # ← save for filename later
-            if best_val_iou > notable_iou:
-                torch.save(
-                    model.state_dict(),
-                    checkpoint_dir / f"{model_name}_iou={best_val_iou:.4f}.pth",
-                )
-                print("✅ New best model saved!")
+    if val_iou > best_val_iou:
+        best_val_iou = val_iou  # ← save for filename later
+        if best_val_iou > notable_iou:
+            torch.save(
+                model.state_dict(),
+                checkpoint_dir / f"{model_name}_iou={best_val_iou:.4f}.pth",
+            )
+            print("✅ New best model saved!")
 
         patience_counter = 0
     else:

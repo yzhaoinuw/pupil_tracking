@@ -7,11 +7,77 @@ Created on Tue Sep 30 14:19:02 2025
 
 
 import random
+
 from PIL import Image
 from torch.utils.data import Dataset
+import torchvision.transforms.functional as TF
 import torchvision.transforms.v2 as transforms
-from torchvision.transforms.v2 import InterpolationMode
+from torchvision.transforms import InterpolationMode as InterpMode  # note: NOT v2 InterpolationMode
 
+
+class RandomAffinePair:
+    """
+    Apply the SAME random affine to (img, mask), but:
+      - img uses BILINEAR interpolation (smooth, natural)
+      - mask uses NEAREST interpolation (keeps labels crisp)
+    Works on PIL Images.
+    """
+    def __init__(
+        self,
+        degrees=8,
+        translate=(0.03, 0.03),
+        scale=(0.95, 1.05),
+        shear=None,
+        fill_img=0,
+        fill_mask=0,
+        p=0.7,
+    ):
+        self.degrees = degrees
+        self.translate = translate
+        self.scale = scale
+        self.shear = shear
+        self.fill_img = fill_img
+        self.fill_mask = fill_mask
+        self.p = p
+
+    def __call__(self, img, mask):
+        if random.random() > self.p:
+            return img, mask
+
+        angle = random.uniform(-self.degrees, self.degrees)
+
+        # translate is specified as fraction of image size
+        max_dx = self.translate[0] * img.size[0]
+        max_dy = self.translate[1] * img.size[1]
+        translations = (int(round(random.uniform(-max_dx, max_dx))),
+                        int(round(random.uniform(-max_dy, max_dy))))
+
+        sc = random.uniform(self.scale[0], self.scale[1])
+
+        # shear can be None, float, or (min,max). Keep None unless you have a reason.
+        shear = self.shear
+        if isinstance(shear, (tuple, list)) and len(shear) == 2:
+            shear = random.uniform(shear[0], shear[1])
+
+        img2 = TF.affine(
+            img,
+            angle=angle,
+            translate=translations,
+            scale=sc,
+            shear=shear if shear is not None else 0.0,
+            interpolation=InterpMode.BILINEAR,
+            fill=self.fill_img,
+        )
+        mask2 = TF.affine(
+            mask,
+            angle=angle,
+            translate=translations,
+            scale=sc,
+            shear=shear if shear is not None else 0.0,
+            interpolation=InterpMode.NEAREST,
+            fill=self.fill_mask,
+        )
+        return img2, mask2
 
 def resize_with_pad(
     img: Image.Image,
@@ -148,16 +214,18 @@ class PupilDataset(Dataset):
 
         self.pil_to_tensor = transforms.PILToTensor()
 
-        # Geometric transforms for (img, mask) together
-        self.transform_img_mask = transforms.Compose(
-            [
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.RandomVerticalFlip(p=0.5),
-                transforms.RandomRotation(
-                    degrees=45,
-                    interpolation=InterpolationMode.NEAREST,  # keep mask crisp
-                ),
-            ]
+        self.flip_h = transforms.RandomHorizontalFlip(p=0.5)
+        self.flip_v = transforms.RandomVerticalFlip(p=0.5)
+        
+        # A single, paired affine that rotates/translates/scales cleanly
+        self.affine_pair = RandomAffinePair(
+            degrees=8,              # much more realistic than 45 for most setups
+            translate=(0.03, 0.03),
+            scale=(0.95, 1.05),
+            shear=None,
+            fill_img=0,
+            fill_mask=0,
+            p=0.7,
         )
 
         # Photometric transforms for image only
@@ -207,9 +275,13 @@ class PupilDataset(Dataset):
                 fill_mask=0,
                 p=0.7
             )
-
-            # flips + rotation
-            img, mask = self.transform_img_mask(img, mask)
+            
+            # flips (paired, safe)
+            img, mask = self.flip_h(img, mask)
+            img, mask = self.flip_v(img, mask)
+            
+            # affine (paired, bilinear img + nearest mask)
+            img, mask = self.affine_pair(img, mask)
 
             # image-only photometric
             img = self.transform_img(img)

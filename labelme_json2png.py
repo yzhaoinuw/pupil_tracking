@@ -9,8 +9,9 @@ from pathlib import Path
 import subprocess
 import shutil
 
-image_dir = Path("./images_validation")
-mask_dir = Path("./masks_validation")
+dataset_type = "train"
+image_dir = Path(f"./images_{dataset_type}")
+mask_dir = Path(f"./masks_{dataset_type}")
 mask_dir.mkdir(exist_ok=True, parents=True)
 
 for json_file in image_dir.glob("*.json"):

@@ -16,7 +16,7 @@ from dataset import PupilDataset
 def show_augmented_samples(
     dataset,
     n_samples=5,
-    n_augs_per_sample=4,
+    n_augs_per_sample=2,
     overlay_mask=True,
     mask_transparency=0.1,
 ):
@@ -41,13 +41,12 @@ def show_augmented_samples(
         squeeze=False,
     )
 
+    sample_indices = np.random.choice(np.arange(len(dataset)), n_samples, replace=False)
     for i in range(n_samples):
         for j in range(n_augs_per_sample):
-            img, mask = dataset[i]
-
+            img, mask = dataset[sample_indices[i]]
             img_np = img.squeeze().numpy()
             ax = axes[i, j]
-
 
             if overlay_mask:
                 mask_np = mask.squeeze().numpy()
@@ -88,7 +87,7 @@ dataset = PupilDataset(
 
 show_augmented_samples(
     dataset,
-    n_samples=5,
-    n_augs_per_sample=5,
+    n_samples=20,
+    n_augs_per_sample=2,
     overlay_mask=True,
 )
