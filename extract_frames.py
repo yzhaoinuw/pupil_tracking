@@ -5,6 +5,7 @@ Created on Thu Oct  2 15:27:03 2025
 @author: yzhao
 """
 
+import sys  # modifiled for system command call from matlab
 import argparse
 from pathlib import Path
 
@@ -41,6 +42,10 @@ def extract_selected_frames(video_path, out_dir, extraction_fps=5, max_frames=10
         total=n_frames,
         desc="Extracting frames",
         unit="frame",
+        file=sys.stdout,
+        mininterval=2.0,
+        ascii=True,
+        bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]\n'
     ):
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(frame_idx))
         ret, frame = cap.read()

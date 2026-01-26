@@ -8,6 +8,7 @@ Created on Tue Oct 21 00:07:48 2025
 
 import argparse
 from pathlib import Path
+import sys  # modifiled for system command call from matlab
 
 import numpy as np
 import pandas as pd
@@ -25,7 +26,7 @@ from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = (
-    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9046.pth"
+    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9158.pth"
 )
 
 
@@ -58,7 +59,11 @@ def generate_pupil_mask_prediction(
 
     results = []
     pbar = tqdm(
-        total=len(test_dataset), desc="Segmenting pupil images...", unit="image"
+        total=len(test_dataset), desc="Segmenting pupil images...", unit="image",
+        file=sys.stdout,
+        mininterval=2.0,
+        ascii=True,
+        bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]\n'
     )
     with torch.inference_mode():
         for images, names in test_loader:
