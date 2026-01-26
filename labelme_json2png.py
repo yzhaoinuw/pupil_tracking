@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import shutil
 
-dataset_type = "train"
+dataset_type = "validation"
 image_dir = Path(f"./images_{dataset_type}")
 mask_dir = Path(f"./masks_{dataset_type}")
 mask_dir.mkdir(exist_ok=True, parents=True)

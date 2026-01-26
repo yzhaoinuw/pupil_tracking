@@ -44,7 +44,7 @@ pred_thresh = 0.7
 notable_iou = 0.85
 patience = 20
 n_epochs = 200
-use_attention=True
+use_attention = True
 
 checkpoint_dir = Path("checkpoints_exp")
 checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -71,9 +71,9 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
 )
 
 # %% -------------------- Training Loop -------------------- #
-#best_val_loss = float("inf")
+# best_val_loss = float("inf")
 best_val_iou = 0
-#prev_iou = 0
+# prev_iou = 0
 patience_counter = 0
 log_lines = []  # ← log storage
 
@@ -124,7 +124,7 @@ for epoch in range(n_epochs):
     )
     print(log_line)
     log_lines.append(log_line)
-    
+
     # -------------------- Early Stopping -------------------- #
     if val_iou > best_val_iou:
         best_val_iou = val_iou  # ← save for filename later

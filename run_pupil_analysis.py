@@ -25,9 +25,7 @@ from extract_frames import extract_selected_frames  # <--- NEW IMPORT
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = (
-    SCRIPT_DIR
-    / "checkpoints"
-    / "unet_atn_resize_130pupils_thresh=0.7_iou=0.8916.pth"
+    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9046.pth"
 )
 
 
@@ -60,9 +58,7 @@ def generate_pupil_mask_prediction(
 
     results = []
     pbar = tqdm(
-        total=len(test_dataset),
-        desc="Segmenting pupil images...",
-        unit="image"
+        total=len(test_dataset), desc="Segmenting pupil images...", unit="image"
     )
     with torch.inference_mode():
         for images, names in test_loader:
@@ -79,7 +75,7 @@ def generate_pupil_mask_prediction(
 
                 if output_mask_dir is not None:
                     orig = Image.open(image_dir / names[i]).convert("L")
-                    #orig = test_dataset.center_crop(orig)
+                    # orig = test_dataset.center_crop(orig)
                     orig = resize_with_pad(orig, target_size=148)
                     orig_np = np.array(orig)
                     rgb = np.stack([orig_np] * 3, axis=-1)
@@ -91,7 +87,7 @@ def generate_pupil_mask_prediction(
                     ).astype(np.uint8)
                     out_path = output_mask_dir / names[i]
                     Image.fromarray(blended).save(out_path)
-                    
+
             pbar.update(image_count)
     pbar.close()
     return results

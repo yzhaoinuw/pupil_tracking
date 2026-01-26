@@ -51,17 +51,17 @@ def show_augmented_samples(
             if overlay_mask:
                 mask_np = mask.squeeze().numpy()
                 rgb = np.stack([img_np] * 3, axis=-1)
-            
-                #alpha = 0.35  # mask transparency (0 = invisible, 1 = solid)
+
+                # alpha = 0.35  # mask transparency (0 = invisible, 1 = solid)
                 red = np.array([1.0, 0.0, 0.0])
-            
+
                 blended = rgb.copy()
-                blended[mask_np > 0] = (
-                    (1 - mask_transparency) * rgb[mask_np > 0] + mask_transparency * red
-                )
-            
+                blended[mask_np > 0] = (1 - mask_transparency) * rgb[
+                    mask_np > 0
+                ] + mask_transparency * red
+
                 ax.imshow(blended)
-                
+
             else:
                 ax.imshow(img_np, cmap="gray")
 
@@ -72,7 +72,7 @@ def show_augmented_samples(
 
     plt.tight_layout()
     plt.show()
-    
+
 
 # example paths
 image_paths = sorted(Path("images_train/").glob("*.png"))

@@ -12,7 +12,9 @@ from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as TF
 import torchvision.transforms.v2 as transforms
-from torchvision.transforms import InterpolationMode as InterpMode  # note: NOT v2 InterpolationMode
+from torchvision.transforms import (
+    InterpolationMode as InterpMode,
+)  # note: NOT v2 InterpolationMode
 
 
 class RandomAffinePair:
@@ -22,6 +24,7 @@ class RandomAffinePair:
       - mask uses NEAREST interpolation (keeps labels crisp)
     Works on PIL Images.
     """
+
     def __init__(
         self,
         degrees=8,
@@ -49,8 +52,10 @@ class RandomAffinePair:
         # translate is specified as fraction of image size
         max_dx = self.translate[0] * img.size[0]
         max_dy = self.translate[1] * img.size[1]
-        translations = (int(round(random.uniform(-max_dx, max_dx))),
-                        int(round(random.uniform(-max_dy, max_dy))))
+        translations = (
+            int(round(random.uniform(-max_dx, max_dx))),
+            int(round(random.uniform(-max_dy, max_dy))),
+        )
 
         sc = random.uniform(self.scale[0], self.scale[1])
 
@@ -78,6 +83,7 @@ class RandomAffinePair:
             fill=self.fill_mask,
         )
         return img2, mask2
+
 
 def resize_with_pad(
     img: Image.Image,
@@ -216,10 +222,10 @@ class PupilDataset(Dataset):
 
         self.flip_h = transforms.RandomHorizontalFlip(p=0.5)
         self.flip_v = transforms.RandomVerticalFlip(p=0.5)
-        
+
         # A single, paired affine that rotates/translates/scales cleanly
         self.affine_pair = RandomAffinePair(
-            degrees=8,              # much more realistic than 45 for most setups
+            degrees=8,  # much more realistic than 45 for most setups
             scale=(0.95, 1.05),
             shear=None,
             fill_img=0,
@@ -247,38 +253,44 @@ class PupilDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
         img = Image.open(img_path).convert("L")
-        img = resize_with_pad(img, target_size=self.target_size, resample=Image.BILINEAR)
+        img = resize_with_pad(
+            img, target_size=self.target_size, resample=Image.BILINEAR
+        )
 
         if self.mask_paths is None:
             img = self.pil_to_tensor(img).float() / 255.0
             return img, img_path.name
 
         mask = Image.open(self.mask_paths[idx]).convert("L")
-        mask = resize_with_pad(mask, target_size=self.target_size, resample=Image.NEAREST)
+        mask = resize_with_pad(
+            mask, target_size=self.target_size, resample=Image.NEAREST
+        )
 
         if self.augment:
             # zoom/translate/pad jitter
             img, mask = random_zoom_translate_pil(
-                img, mask,
+                img,
+                mask,
                 target_size=self.target_size,
                 scale_range=self.scale_range,
-                fill_img=0, 
+                fill_img=0,
                 fill_mask=0,
-                p=0.7
+                p=0.7,
             )
             img, mask = random_pad_and_crop_pil(
-                img, mask,
+                img,
+                mask,
                 target_size=self.target_size,
                 max_pad=self.max_pad,
-                fill_img=0, 
+                fill_img=0,
                 fill_mask=0,
-                p=0.7
+                p=0.7,
             )
-            
+
             # flips (paired, safe)
             img, mask = self.flip_h(img, mask)
             img, mask = self.flip_v(img, mask)
-            
+
             # affine (paired, bilinear img + nearest mask)
             img, mask = self.affine_pair(img, mask)
 
