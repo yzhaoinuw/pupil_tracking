@@ -220,17 +220,17 @@ class PupilDataset(Dataset):
 
         self.pil_to_tensor = transforms.PILToTensor()
 
-        self.flip_h = transforms.RandomHorizontalFlip(p=0.5)
-        self.flip_v = transforms.RandomVerticalFlip(p=0.5)
+        self.flip_h = transforms.RandomHorizontalFlip(p=0.2)
+        self.flip_v = transforms.RandomVerticalFlip(p=0.2)
 
         # A single, paired affine that rotates/translates/scales cleanly
         self.affine_pair = RandomAffinePair(
-            degrees=8,  # much more realistic than 45 for most setups
+            degrees=15,
             scale=(0.95, 1.05),
             shear=None,
             fill_img=0,
             fill_mask=0,
-            p=0.7,
+            p=0.2,
         )
 
         # Photometric transforms for image only
@@ -238,11 +238,11 @@ class PupilDataset(Dataset):
             [
                 transforms.RandomApply(
                     [transforms.ColorJitter(brightness=0.2, contrast=0.2)],
-                    p=0.5,
+                    p=0.2,
                 ),
                 transforms.RandomApply(
                     [transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))],
-                    p=0.5,
+                    p=0.2,
                 ),
             ]
         )
@@ -275,7 +275,7 @@ class PupilDataset(Dataset):
                 scale_range=self.scale_range,
                 fill_img=0,
                 fill_mask=0,
-                p=0.7,
+                p=0.2,
             )
             img, mask = random_pad_and_crop_pil(
                 img,
@@ -284,7 +284,7 @@ class PupilDataset(Dataset):
                 max_pad=self.max_pad,
                 fill_img=0,
                 fill_mask=0,
-                p=0.7,
+                p=0.2,
             )
 
             # flips (paired, safe)

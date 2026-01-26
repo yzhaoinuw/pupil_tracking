@@ -20,12 +20,12 @@ from torch.utils.data import DataLoader
 
 from unet import UNet
 from dataset import PupilDataset, resize_with_pad
-from extract_frames import extract_selected_frames  # <--- NEW IMPORT
+from extract_frames import extract_selected_frames
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = (
-    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9046.pth"
+    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9158.pth"
 )
 
 
