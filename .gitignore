@@ -28,6 +28,7 @@ codegen/
 
 # Cache files
 *.slxc
+*.pyc
 
 # Cloud based storage dotfile
 .MATLABDriveTag
@@ -47,3 +48,4 @@ results/
 
 # sketches
 *sketch.py
+__pycache__/dataset.cpython-314.pyc
