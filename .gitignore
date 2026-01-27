@@ -40,8 +40,8 @@ codegen/
 *.sbproj.bak
 
 # folders
+__pycache__/
 data/
-checkpoints/
 archive/
 results/
 
