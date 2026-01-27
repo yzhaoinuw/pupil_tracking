@@ -5,8 +5,9 @@ Created on Tue Oct 21 00:07:48 2025
 @author: yzhao
 """
 
-
 import argparse
+import re
+from importlib import resources
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -17,14 +18,23 @@ from PIL import Image
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from dataset import PupilDataset, resize_with_pad
-from extract_frames import extract_selected_frames
-from unet import UNet
+from pupil_tracking.dataset import PupilDataset, resize_with_pad
+from pupil_tracking.extract_frames import extract_selected_frames
+from pupil_tracking.unet import UNet
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_CHECKPOINT = (
-    SCRIPT_DIR / "checkpoints" / "unet_atn_resize_166pupils_thresh=0.7_iou=0.9158.pth"
-)
+_IOU_RE = re.compile(r"iou=(0\.\d+)")
+
+best = None
+with resources.as_file(resources.files("pupil_tracking") / "checkpoints") as ckpt_dir:
+    for p in ckpt_dir.glob("*.pth"):
+        m = _IOU_RE.search(p.name)
+        if not m:
+            continue
+        iou = float(m.group(1))
+        if best is None or iou > best[0]:
+            best = (iou, p)
+assert best is not None, "No packaged checkpoints found."
+DEFAULT_CHECKPOINT = best[1]
 
 
 def generate_pupil_mask_prediction(

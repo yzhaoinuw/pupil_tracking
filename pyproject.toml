@@ -17,11 +17,15 @@ dependencies = [
 ]
 
 [project.scripts]
-extract-frames = "extract_frames:main"
-run-pupil-analysis = "run_pupil_analysis:main"
+extract-frames = "pupil_tracking.extract_frames:main"
+run-pupil-analysis = "pupil_tracking.run_pupil_analysis:main"
 
-[tool.setuptools]
-py-modules = ["extract_frames", "run_pupil_analysis", "dataset", "unet"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pupil_tracking*"]
+
+[tool.setuptools.package-data]
+pupil_tracking = ["checkpoints/*.pth"]
 
 [build-system]
 requires = ["setuptools>=80.9"]

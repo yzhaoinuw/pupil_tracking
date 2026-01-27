@@ -10,9 +10,8 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
-
 from dataset import PupilDataset
+from torch.utils.data import DataLoader
 from unet import UNet
 
 

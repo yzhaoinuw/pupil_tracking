@@ -10,11 +10,10 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from dataset import PupilDataset
 from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision import transforms
-
-from dataset import PupilDataset
 from unet import UNet
 
 checkpoint_dir = Path("checkpoints")
