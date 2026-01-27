@@ -53,8 +53,8 @@ ignore = ["E501"]
 [project.optional-dependencies]
 dev = [
   "pytest>=7",
-  "black>=24.0",
-  "ruff>=0.8",
+  "black==25.1.0",
+  "ruff==0.14.14",
   "pre-commit>=3",
   "build>=1",
 ]
