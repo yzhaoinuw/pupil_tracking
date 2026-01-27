@@ -8,9 +8,8 @@ Created on Tue Jul 29 12:35:06 2025
 from pathlib import Path
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 DATA_PATH = "./data_cropped_centered/"
 # Load grayscale image
@@ -28,18 +27,10 @@ DATA_PATH = "./data_cropped_centered/"
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_69064.png"
 
 # problematic
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png"  # hard
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png"  # hard
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png"  # hard
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png"  # hard
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png"  # hard
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png"  # hard
 # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0030.png" # subtle pupil
 # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0450.png" # subtle pupil
 # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_7410.png" # no pupil, eye closed

@@ -5,9 +5,9 @@ Created on Wed Jul 23 17:22:00 2025
 @author: yzhao
 """
 
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 
 # === SETTINGS ===
 labels_csv = Path("C:/Users/yzhao/python_projects/pupil_tracking/labels.csv")

@@ -12,8 +12,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from unet import UNet
 from dataset import PupilDataset
+from unet import UNet
 
 
 # -------------------- Metrics -------------------- #

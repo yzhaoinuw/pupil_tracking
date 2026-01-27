@@ -8,8 +8,8 @@ Created on Tue Jul 29 22:18:11 2025
 from pathlib import Path
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.ndimage import center_of_mass
 
 
@@ -55,26 +55,14 @@ DATA_PATH = "./data_cropped_centered/"
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_69064.png"
 
 # low contrast pupil
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png"  # hard
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png"  # hard
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png"  # hard
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png"  # hard
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png"  # hard
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png"  # hard
 
 # small, subtle pupil
-image_file = (
-    "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0030.png"  # subtle pupil
-)
-image_file = (
-    "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0450.png"  # subtle pupil
-)
+image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0030.png"  # subtle pupil
+image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0450.png"  # subtle pupil
 
 # large pupil
 # image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_16260.png"
@@ -90,9 +78,7 @@ image_file = (
 pupil_image = Path(DATA_PATH) / image_file
 # Example usage
 img = cv2.imread(pupil_image, cv2.IMREAD_GRAYSCALE)
-img_enhanced = exponential_dark_affinity(
-    img, threshold=50, decay_rate=0.25, percentile=1
-)
+img_enhanced = exponential_dark_affinity(img, threshold=50, decay_rate=0.25, percentile=1)
 com_y, com_x = center_of_mass(img_enhanced)  # Note: (y, x) order
 
 plt.figure(figsize=(3, 3))

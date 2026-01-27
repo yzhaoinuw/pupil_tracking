@@ -5,12 +5,11 @@ Created on Tue Jul 22 14:28:50 2025
 @author: yzhao
 """
 
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 import cv2
 import pandas as pd
-
 
 # Constants
 MAX_POINTS = 10
@@ -142,9 +141,7 @@ def main():
             continue
 
         image = cv2.imread(str(img_path))
-        label_data, action = label_frame(
-            image, frame_name, labeler, window_name=WINDOW_NAME
-        )
+        label_data, action = label_frame(image, frame_name, labeler, window_name=WINDOW_NAME)
 
         if label_data is not None:
             all_labels.append(label_data)

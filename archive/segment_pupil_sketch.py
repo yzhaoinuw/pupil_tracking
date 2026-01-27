@@ -8,8 +8,8 @@ Created on Fri Jul 25 15:42:44 2025
 import os
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def remove_appendages(binary_mask, max_kernel_frac=0.2):
@@ -29,9 +29,7 @@ def remove_appendages(binary_mask, max_kernel_frac=0.2):
     cleaned_mask : np.ndarray
         Mask with appendages removed but pupil preserved.
     """
-    contours, _ = cv2.findContours(
-        binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return binary_mask
 

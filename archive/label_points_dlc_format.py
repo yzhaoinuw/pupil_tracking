@@ -1,7 +1,8 @@
+from collections import defaultdict
+from pathlib import Path
+
 import cv2
 import pandas as pd
-from pathlib import Path
-from collections import defaultdict
 
 # --- Config ---
 FRAME_FOLDER = Path("./data_cropped_centered")

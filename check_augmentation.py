@@ -7,8 +7,8 @@ Created on Thu Jan 22 17:18:21 2026
 
 from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 from dataset import PupilDataset
 

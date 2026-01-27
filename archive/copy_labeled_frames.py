@@ -6,10 +6,9 @@ Created on Wed Jul 23 17:01:45 2025
 """
 
 import shutil
-
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 
 # Paths (adjust if needed)
 labels_xlsx = Path("C:/Users/yzhao/python_projects/pupil_tracking/labels.csv")

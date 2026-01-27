@@ -27,9 +27,7 @@ def remove_appendages(binary_mask, max_kernel_frac=0.15):
     cleaned_mask : np.ndarray
         Mask with appendages removed but pupil preserved.
     """
-    contours, _ = cv2.findContours(
-        binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return binary_mask
 

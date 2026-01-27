@@ -8,16 +8,13 @@ Created on Fri Jul 25 14:24:36 2025
 import os
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 DATA_PATH = "./data_cropped_centered/"
 # Load grayscale image
 image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_27210.png"
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_11640.png"
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_11640.png"
 img = cv2.imread(os.path.join(DATA_PATH, image_file), cv2.IMREAD_GRAYSCALE)
 
 # Step 1: Enhance contrast

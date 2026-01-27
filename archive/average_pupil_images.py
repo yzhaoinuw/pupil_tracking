@@ -5,21 +5,18 @@ Created on Sun Jul 27 18:39:19 2025
 @author: yzhao
 """
 
-import numpy as np
+import sys
+from pathlib import Path
+
 import cv2
 import matplotlib.pyplot as plt
-from pathlib import Path
-import sys
+import numpy as np
 
 
 def average_images(folder_path, save_path=""):
     folder = Path(folder_path)
     image_files = sorted(
-        [
-            f
-            for f in folder.glob("*")
-            if f.suffix.lower() in [".png", ".jpg", ".jpeg", ".bmp"]
-        ]
+        [f for f in folder.glob("*") if f.suffix.lower() in [".png", ".jpg", ".jpeg", ".bmp"]]
     )
 
     if not image_files:

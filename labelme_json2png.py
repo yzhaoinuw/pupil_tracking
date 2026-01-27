@@ -5,9 +5,9 @@ Created on Sun Sep 28 20:25:21 2025
 @author: yzhao
 """
 
-from pathlib import Path
-import subprocess
 import shutil
+import subprocess
+from pathlib import Path
 
 dataset_type = "validation"
 image_dir = Path(f"./images_{dataset_type}")

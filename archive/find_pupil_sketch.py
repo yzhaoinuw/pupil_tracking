@@ -8,12 +8,10 @@ Created on Tue Jul 29 14:35:10 2025
 from pathlib import Path
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.ndimage import center_of_mass
-
-from utils import expose_hot_area, get_mass_center, draw_mask_contour
-
+from utils import draw_mask_contour, expose_hot_area, get_mass_center
 
 # %%
 DATA_PATH = "./data_cropped_centered/"
@@ -32,9 +30,7 @@ DATA_PATH = "./data_cropped_centered/"
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_69064.png"
 
 # low contrast pupil
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_67609.png"
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82547.png" # hard
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_82741.png" # hard
 # image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_84196.png" # hard
@@ -151,10 +147,7 @@ contours = sorted(filtered_contours, key=cv2.contourArea, reverse=True)
 main_contour = None
 for cnt in contours:
     dist = np.linalg.norm(get_mass_center(cnt) - image_center)
-    if (
-        cv2.pointPolygonTest(cnt, image_center, measureDist=False) >= 0
-        or abs(dist) <= 20
-    ):
+    if cv2.pointPolygonTest(cnt, image_center, measureDist=False) >= 0 or abs(dist) <= 20:
         main_contour = cnt
         main_contour_center = get_mass_center(cnt)
         break

@@ -8,10 +8,10 @@ Created on Tue Sep 30 14:19:02 2025
 
 import random
 
-from PIL import Image
-from torch.utils.data import Dataset
 import torchvision.transforms.functional as TF
 import torchvision.transforms.v2 as transforms
+from PIL import Image
+from torch.utils.data import Dataset
 from torchvision.transforms import (
     InterpolationMode as InterpMode,
 )  # note: NOT v2 InterpolationMode
@@ -253,18 +253,14 @@ class PupilDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
         img = Image.open(img_path).convert("L")
-        img = resize_with_pad(
-            img, target_size=self.target_size, resample=Image.BILINEAR
-        )
+        img = resize_with_pad(img, target_size=self.target_size, resample=Image.BILINEAR)
 
         if self.mask_paths is None:
             img = self.pil_to_tensor(img).float() / 255.0
             return img, img_path.name
 
         mask = Image.open(self.mask_paths[idx]).convert("L")
-        mask = resize_with_pad(
-            mask, target_size=self.target_size, resample=Image.NEAREST
-        )
+        mask = resize_with_pad(mask, target_size=self.target_size, resample=Image.NEAREST)
 
         if self.augment:
             # zoom/translate/pad jitter

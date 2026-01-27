@@ -9,19 +9,17 @@ Created on Tue Oct 21 00:07:48 2025
 import argparse
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from PIL import Image
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-
 import torch
+from PIL import Image
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
-from unet import UNet
 from dataset import PupilDataset, resize_with_pad
 from extract_frames import extract_selected_frames
-
+from unet import UNet
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CHECKPOINT = (
@@ -44,9 +42,7 @@ def generate_pupil_mask_prediction(
         raise FileNotFoundError(f"No PNG files found in {image_dir}")
 
     test_dataset = PupilDataset(image_paths)
-    test_loader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False, num_workers=4
-    )
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     print("Loading UNet model...")
     model = UNet(use_attention=True)
@@ -57,9 +53,7 @@ def generate_pupil_mask_prediction(
     model.eval()
 
     results = []
-    pbar = tqdm(
-        total=len(test_dataset), desc="Segmenting pupil images...", unit="image"
-    )
+    pbar = tqdm(total=len(test_dataset), desc="Segmenting pupil images...", unit="image")
     with torch.inference_mode():
         for images, names in test_loader:
             image_count = images.size(0)
@@ -82,9 +76,9 @@ def generate_pupil_mask_prediction(
                     mask = preds[i].squeeze()
                     overlay = rgb.copy()
                     overlay[mask == 1] = [255, 0, 0]
-                    blended = (
-                        (1 - mask_transparency) * rgb + mask_transparency * overlay
-                    ).astype(np.uint8)
+                    blended = ((1 - mask_transparency) * rgb + mask_transparency * overlay).astype(
+                        np.uint8
+                    )
                     out_path = output_mask_dir / names[i]
                     Image.fromarray(blended).save(out_path)
 
@@ -162,9 +156,7 @@ def main():
             args.out_dir = args.video_path.parent / f"{args.video_path.stem}_frames"
             print(f"No out_dir provided. Using default: {args.out_dir}")
 
-        extract_selected_frames(
-            args.video_path, args.out_dir, args.extraction_fps, args.max_frames
-        )
+        extract_selected_frames(args.video_path, args.out_dir, args.extraction_fps, args.max_frames)
         args.image_dir = args.out_dir
 
     elif args.image_dir is None:
@@ -189,9 +181,7 @@ def main():
             args.result_dir = Path(str(args.image_dir) + "_result")
         print(f"No result_dir provided. Using default: {args.result_dir}")
     args.result_dir.mkdir(parents=True, exist_ok=True)
-    exp_name = (
-        "_".join(Path(results[0][0]).stem.split("_")[:-1]) if results else "experiment"
-    )
+    exp_name = "_".join(Path(results[0][0]).stem.split("_")[:-1]) if results else "experiment"
     save_results(results, args.result_dir, exp_name)
 
 

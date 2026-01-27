@@ -9,8 +9,8 @@ Created on Sat Jul 26 13:03:41 2025
 import os
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def remove_appendages(binary_mask, max_kernel_frac=0.2):
@@ -30,9 +30,7 @@ def remove_appendages(binary_mask, max_kernel_frac=0.2):
     cleaned_mask : np.ndarray
         Mask with appendages removed but pupil preserved.
     """
-    contours, _ = cv2.findContours(
-        binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return binary_mask
 
@@ -46,9 +44,7 @@ def remove_appendages(binary_mask, max_kernel_frac=0.2):
     return cleaned_mask
 
 
-def hybrid_contrast_enhance(
-    img, low_percentile=5, gamma=0.4, clip_limit=2.0, tile_size=(5, 5)
-):
+def hybrid_contrast_enhance(img, low_percentile=5, gamma=0.4, clip_limit=2.0, tile_size=(5, 5)):
     """
     Hybrid contrast enhancement:
     - Globally crush darkest pixels using percentile + gamma
@@ -85,21 +81,13 @@ DATA_PATH = "./data_cropped_centered/"
 image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_3686.png"
 
 image_file = "250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_27210.png"
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_11640.png"
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_11640.png"
 image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_3880.png"
 image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_1455.png"
 image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_0485.png"
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_20079.png"
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_31913.png"
-)
-image_file = (
-    "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_42680.png"
-)
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_20079.png"
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_31913.png"
+image_file = "250530_5003_Green_Training_very_dm_light_2025-05-30T09-27-57.042_42680.png"
 
 
 img = cv2.imread(os.path.join(DATA_PATH, image_file), cv2.IMREAD_GRAYSCALE)

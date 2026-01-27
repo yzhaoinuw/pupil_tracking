@@ -1,7 +1,7 @@
-import pandas as pd
-import cv2
-import os
 from pathlib import Path
+
+import cv2
+import pandas as pd
 
 # --- USER SETTINGS ---
 LABELS_CSV = "labels.csv"
@@ -81,6 +81,4 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    crop_all_images(
-        IMAGES_DIR, "./data_cropped", crop_center=CROP_CENTER, crop_size=CROP_SIZE
-    )
+    crop_all_images(IMAGES_DIR, "./data_cropped", crop_center=CROP_CENTER, crop_size=CROP_SIZE)

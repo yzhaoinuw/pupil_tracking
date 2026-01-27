@@ -7,7 +7,6 @@ Created on Wed Jul 23 16:47:46 2025
 
 import deeplabcut
 
-
 deeplabcut.create_new_project(
     "PupilTracking",
     "YueZhao",

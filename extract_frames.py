@@ -56,9 +56,7 @@ def extract_selected_frames(video_path, out_dir, extraction_fps=5, max_frames=10
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Extract evenly spaced frames from a video."
-    )
+    parser = argparse.ArgumentParser(description="Extract evenly spaced frames from a video.")
     parser.add_argument(
         "--video_path",
         type=Path,
@@ -82,9 +80,7 @@ def main():
     )
 
     args = parser.parse_args()
-    extract_selected_frames(
-        args.video_path, args.out_dir, args.extraction_fps, args.max_frames
-    )
+    extract_selected_frames(args.video_path, args.out_dir, args.extraction_fps, args.max_frames)
 
 
 if __name__ == "__main__":

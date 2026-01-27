@@ -6,8 +6,8 @@ Created on Fri Jul 25 14:16:26 2025
 """
 
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Load image
 image_file = "C:/Users/yzhao/python_projects/pupil_tracking/data_cropped_centered/250616_5120_Purple_sleep_trial_1_2025-06-16T16-31-19.701_0630.png"

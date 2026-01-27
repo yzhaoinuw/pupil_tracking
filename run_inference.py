@@ -8,21 +8,17 @@ Created on Mon Sep 29 00:34:33 2025
 import os
 from pathlib import Path
 
+import numpy as np
 import torch
+from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-import numpy as np
-from PIL import Image
-
-from unet import UNet
 from dataset import PupilDataset
-
+from unet import UNet
 
 checkpoint_dir = Path("checkpoints")
-checkpoint_path = (
-    checkpoint_dir / "unet_attention_84pupils_pred_thresh=0.7_iou=0.8990.pth"
-)
+checkpoint_path = checkpoint_dir / "unet_attention_84pupils_pred_thresh=0.7_iou=0.8990.pth"
 image_dir = "images_test_3/"
 
 # Optional: blend with original for transparency
